@@ -27,25 +27,20 @@ function App() {
 
   const [coins, setCoins] = useState([]);
   const [search, setSearch] = useState('');
+  const [time, setTime] = useState('');
   const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
 
-  // useEffect(() => {
-  //   axios.get(url)
-  //   .then(res => {
-  //     setCoins(res.data);
-  //   })
-  //   .catch(error => console.log(error));
-  // }, []);
-
+  // custom hook to poll api every second
+  // last updated info stored in state
   useInterval(() => {
     axios.get(url)
     .then(res => {
       setCoins(res.data);
+      setTime(new Date(res.data[0].last_updated).toString().slice(0, 25))
     })
     .catch(error => console.log(error));
-    },
-    5000
-  )
+    }, 1000
+  );
 
   const handleChange = e => {
     setSearch(e.target.value);
@@ -55,25 +50,17 @@ function App() {
     coin.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  // let date = new Date(filteredCoins[0]);
-  let date = new Date(filteredCoins[0].last_updated);
-  let localDate = date.toString().slice(0, 25)
-  console.log(localDate)
-
   return (
     <div className="coin-app">
       <div className="coin-search">
-        <h1 className="coin-text">Crypto Marketlist</h1>
+        <h1 className="coin-text">Coin Table</h1>
         <form>
           <input type="text" className="coin-input" placeholder="Search" onChange={handleChange}></input> 
         </form>
       </div>
-      <div className="last-updated">
-        Last Updated: {localDate}
+      <div className='last-updated'>
+        Last Updated: {time}
       </div>
-      {/* <div className='last-updated'>
-        {filteredCoins[0].last_updated}
-      </div> */}
       <table className="labels">
         <th className="name">Name</th>
         <th className="symbol">Symbol</th>
@@ -82,7 +69,6 @@ function App() {
         <th className="volume">Volume(24hr)</th>
         <th className="market-cap">Market Cap</th>
       </table>
-    
       {filteredCoins.map(coin => {
         return (
           <Coin 
