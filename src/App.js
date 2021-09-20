@@ -1,27 +1,8 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import Coin from './Coin.js';
-
-function useInterval(callback, delay) {
-  const savedCallback = useRef();
-
-  // Remember the latest callback.
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  // Set up the interval.
-  useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    }
-  }, [delay]);
-}
+import useInterval from './useInterval';
 
 function App() {
 
@@ -30,8 +11,7 @@ function App() {
   const [time, setTime] = useState('');
   const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
 
-  // custom hook to poll api every second
-  // last updated info stored in state
+  // custom hook to poll api every second, see useInterval.js file
   useInterval(() => {
     axios.get(url)
     .then(res => {
@@ -42,10 +22,7 @@ function App() {
     }, 1000
   );
 
-  const handleChange = e => {
-    setSearch(e.target.value);
-  }
-
+  // filter coins that meet search input
   const filteredCoins = coins.filter(coin => 
     coin.name.toLowerCase().includes(search.toLowerCase())
   )
@@ -55,7 +32,7 @@ function App() {
       <div className="coin-search">
         <h1 className="coin-text">Coin Table</h1>
         <form>
-          <input type="text" className="coin-input" placeholder="Search" onChange={handleChange}></input> 
+          <input type="text" className="coin-input" placeholder="Search" onChange={(e) => setSearch(e.target.value)}></input> 
         </form>
       </div>
       <div className='last-updated'>
